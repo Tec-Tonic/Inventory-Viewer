@@ -103,6 +103,20 @@
                             <h2 class="text-center">Upload file</h2>
                             <label for="fileInput" class="form-label">Select File:</label>
                             <input type="file" class="form-control" id="fileInputInventory" />
+                            <div id="infoBit" class="card mt-3">
+                                <div class="card-header">
+                                    <h5>Instructions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Run the <code>/trigger inspect_inventory</code> and
+                                            get the players inventory data.</li>
+                                        <li class="list-group-item">Upload your <code>latest.log</code> file</li>
+                                        <li class="list-group-item">This will automatically search for the last players
+                                            inventory in your <code>latest.log</code> file.</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -152,6 +166,11 @@
 
             // Append the button to the upload container
             uploadContainer.appendChild(refreshButton);
+
+            const infoBit = document.getElementById("infoBit");
+            if (infoBit) {
+                infoBit.remove();
+            }
         });
 
         for (let i = 0; i < 27; i++) {
