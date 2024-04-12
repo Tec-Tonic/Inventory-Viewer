@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="shortcut icon"
+        href="https://tec-tonic.github.io/Mob-Heads-Checklist/src/img/site/active.png?ex=659dbeae&is=658b49ae&hm=6c031d2c93cfcd4a46be92652fdb74bf10df39fb7a4a4d5198a28ac6b88b33bc&">
+    <title>Minecraft Inventory</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" />
+    <style>
+        #main {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #nameContainer {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #inventory {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            grid-gap: 10px;
+            width: 90%;
+            margin: 0 auto;
+            margin-bottom: 0;
+            background-color: #333;
+        }
+
+        #hotbar {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-gap: 10px;
+            width: 90%;
+            margin: 0 auto;
+            margin-top: 5px;
+            background-color: #333;
+        }
+
+        .item {
+            border: 3px solid lightgrey;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .slot-number {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .item img {
+            width: 32px;
+            height: 32px;
+        }
+
+        #armor-offhand-container {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-gap: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            width: 90%;
+            margin: 0 auto;
+            background-color: #333;
+        }
+
+        #armor {
+            grid-column: span 4;
+        }
+
+        #offhand {
+            grid-column: span 1;
+        }
+
+        #armor .item,
+        #offhand .item {
+            border: 3px solid lightgrey;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .empty-cell {
+            border: none;
+        }
+    </style>
+</head>
+
+<body data-bs-theme="dark">
+    <div id="loading-wrapper">
+        <div id="loading-text">LOADING</div>
+        <div id="loading-content"></div>
+    </div>
+
+    <div class="ccontainer-fluid my-3 mx-auto w-50 rounded p-1" id="main">
+        <div class="container-fluid my-3 mx-auto w-50 rounded p-1" id="inventory-upload">
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <div>
+                            <h2 class="text-center">Upload file</h2>
+                            <label for="fileInput" class="form-label">Select File:</label>
+                            <input type="file" class="form-control" id="fileInputInventory" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="inventory-container" style="display: none">
+        <div class="ccontainer-fluid my-3 mx-auto w-50 rounded p-1" id="nameContainer"></div>
+        <div id="inventory"></div>
+        <div id="hotbar"></div>
+        <div id="armor-offhand-container">
+            <div class="item" id="armor-head"></div>
+            <div class="item" id="armor-chest"></div>
+            <div class="item" id="armor-legs"></div>
+            <div class="item" id="armor-feet"></div>
+            <div class="item" id="weapon-offhand"></div>
+            <div class="item empty-cell"></div>
+            <div class="item empty-cell"></div>
+            <div class="item empty-cell"></div>
+            <div class="item empty-cell"></div>
+        </div>
+    </div>
+
+    <script src="../script/inv_script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        window.addEventListener("load", function () {
+            var load_screen = document.getElementById("loading-wrapper");
+            document.body.removeChild(load_screen);
+        });
+
+        const fileInput = document.getElementById("fileInputInventory");
+        const uploadContainer = document.getElementById("inventory-upload");
+
+        fileInput.addEventListener("change", () => {
+            // Create a new button element
+            const refreshButton = document.createElement("button");
+            refreshButton.textContent = "Clear Data";
+            refreshButton.classList.add("btn", "btn-danger", "ms-3");
+
+            // Add a click event listener to the button
+            refreshButton.addEventListener("click", () => {
+                location.reload();
+            });
+
+            // Append the button to the upload container
+            uploadContainer.appendChild(refreshButton);
+        });
+
+        for (let i = 0; i < 27; i++) {
+            let slot = document.createElement("div");
+            slot.classList.add("item");
+            slot.id = `slot-${i}`;
+            let slotNumber = document.createElement("div");
+            slotNumber.classList.add("slot-number");
+            slotNumber.textContent = i + 1;
+            slot.appendChild(slotNumber);
+            document.getElementById("inventory").appendChild(slot);
+        }
+
+        for (let i = 0; i < 9; i++) {
+            let slot = document.createElement("div");
+            slot.classList.add("item");
+            slot.id = `hotbar-slot-${i}`;
+            let slotNumber = document.createElement("div");
+            slotNumber.classList.add("slot-number");
+            slotNumber.textContent = i + 1;
+            slot.appendChild(slotNumber);
+            document.getElementById("hotbar").appendChild(slot);
+        }
+
+        function updateInventoryDisplay() {
+            for (let i = 0; i < inventoryData.length; i++) {
+                let location = inventoryData[i].location.split(".");
+                let slotNumber = +location[1];
+                if (location[0] === "hotbar") {
+                    let slot = document.getElementById(`hotbar-slot-${slotNumber}`);
+
+                    if (
+                        redBackgroundItems.includes(inventoryData[i].name.toLowerCase())
+                    ) {
+                        if (location[0] === "hotbar") {
+                            slot = document.getElementById(`hotbar-slot-${slotNumber}`);
+                        }
+                        slot.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+                    }
+
+                    if (inventoryData[i].itemNameAfterNbt) {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"><p>${inventoryData[i].quantity}</p><p>${inventoryData[i].itemNameAfterNbt}</p>`;
+                    } else {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"><p>${inventoryData[i].quantity}</p>`;
+                    }
+                } else if (location[0] === "armor") {
+                    let slot = document.getElementById(`${location[0]}-${location[1]}`);
+
+                    if (
+                        redBackgroundItems.includes(inventoryData[i].name.toLowerCase())
+                    ) {
+                        slot.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+                    }
+
+                    if (inventoryData[i].itemNameAfterNbt) {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"}><p>${inventoryData[i].quantity}</p><p>${inventoryData[i].itemNameAfterNbt}</p>`;
+                    } else {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"><p>${inventoryData[i].quantity}</p>`;
+                    }
+                } else if (location[0] === "weapon") {
+                    let slot = document.getElementById(`${location[0]}-${location[1]}`);
+
+                    if (
+                        redBackgroundItems.includes(inventoryData[i].name.toLowerCase())
+                    ) {
+                        slot.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+                    }
+
+                    if (inventoryData[i].itemNameAfterNbt) {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"}><p>${inventoryData[i].quantity}</p><p>${inventoryData[i].itemNameAfterNbt}</p>`;
+                    } else {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"><p>${inventoryData[i].quantity}</p>`;
+                    }
+                } else if (location[0] === "inventory") {
+                    let slot = document.getElementById(`slot-${slotNumber}`);
+
+                    if (
+                        redBackgroundItems.includes(inventoryData[i].name.toLowerCase())
+                    ) {
+                        slot.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+                    }
+
+                    if (inventoryData[i].itemNameAfterNbt) {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"}><p>${inventoryData[i].quantity}</p><p>${inventoryData[i].itemNameAfterNbt}</p>`;
+                    } else {
+                        slot.innerHTML = `<img src="../item/${inventoryData[i].name}.png" alt="${inventoryData[i].name}" data-bs-toggle="tooltip" data-bs-original-title="${inventoryData[i].name}"><p>${inventoryData[i].quantity}</p>`;
+                    }
+                }
+            }
+            document.getElementById("inventory-container").style.display = "block";
+        }
+    </script>
+</body>
+
+</html>
